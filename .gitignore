@@ -1,0 +1,4 @@
+**/__pycache__
+/SLIDE/cpp/build/
+/SLIDE/cpp/dist/
+SLIDE/cpp/*egg-info/
