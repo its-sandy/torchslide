@@ -1,0 +1,30 @@
+
+get_cpp_imp_latency K 3 L 2 in_dim 8 ratio 3 batch_size 3 num_iter 100 num_threads 48
+avg_time_hash_values=0.026622 avg_time_hash_indices=0.028100
+
+get_cpp_imp_latency K 9 L 50 in_dim 128 ratio 3 batch_size 128 num_iter 100 num_threads 48
+avg_time_hash_values=0.451207 avg_time_hash_indices=0.033121
+
+get_cpp_imp_latency K 9 L 50 in_dim 128 ratio 3 batch_size 65536 num_iter 100 num_threads 48
+avg_time_hash_values=220.999942 avg_time_hash_indices=12.384357
+
+get_cpp_imp_latency K 9 L 50 in_dim 128 ratio 3 batch_size 524288 num_iter 100 num_threads 48
+avg_time_hash_values=1617.763958 avg_time_hash_indices=75.198703
+
+get_cpp_imp_latency K 9 L 50 in_dim 4096 ratio 3 batch_size 4096 num_iter 100 num_threads 48
+avg_time_hash_values=435.085211 avg_time_hash_indices=1.128502
+
+get_python_imp_latency K 3 L 2 in_dim 8 batch_size 3 num_iter 100 num_threads 48
+avg_time_scatter=0.048094 avg_time_multiply=0.011978 avg_time_indices=0.047417
+
+get_python_imp_latency K 9 L 50 in_dim 128 batch_size 128 num_iter 100 num_threads 48
+avg_time_scatter=8.405485 avg_time_multiply=0.077491 avg_time_indices=0.292997
+
+get_python_imp_latency K 9 L 50 in_dim 128 batch_size 65536 num_iter 100 num_threads 48
+avg_time_scatter=316.956663 avg_time_multiply=41.595068 avg_time_indices=64.725332
+
+get_python_imp_latency K 9 L 50 in_dim 128 batch_size 524288 num_iter 100 num_threads 48
+avg_time_scatter=2199.914598 avg_time_multiply=129.728227 avg_time_indices=500.688524
+
+get_python_imp_latency K 9 L 50 in_dim 4096 batch_size 4096 num_iter 100 num_threads 48
+avg_time_scatter=507.452431 avg_time_multiply=11.031532 avg_time_indices=1.824517

@@ -1,0 +1,6 @@
+get_hash_computation_latency K 9 L 50 in_dim 4096 ratio 3 batch_size 128 active_in_dim -1 num_iter 100 num_threads 48 avg_iter_time=11.844215
+get_hash_computation_latency K 9 L 50 in_dim 4096 ratio 3 batch_size 4096 active_in_dim -1 num_iter 100 num_threads 48 avg_iter_time=414.862790
+get_hash_computation_latency K 6 L 50 in_dim 4096 ratio 3 batch_size 128 active_in_dim -1 num_iter 100 num_threads 48 avg_iter_time=9.120622
+get_hash_computation_latency K 6 L 50 in_dim 4096 ratio 3 batch_size 4096 active_in_dim -1 num_iter 100 num_threads 48 avg_iter_time=304.969211
+get_hash_computation_latency K 6 L 25 in_dim 4096 ratio 3 batch_size 128 active_in_dim -1 num_iter 100 num_threads 48 avg_iter_time=5.057087
+get_hash_computation_latency K 6 L 25 in_dim 4096 ratio 3 batch_size 4096 active_in_dim -1 num_iter 100 num_threads 48 avg_iter_time=145.850897
