@@ -10,28 +10,28 @@ void diso_non_threaded_kernel(
         const torch::Tensor& weights,
         const torch::Tensor& bias){
 
-    int64_t batch_size = active_out_indices.size(0);
-    int64_t active_out_dim = active_out_indices.size(1);
-    int64_t in_dim = weights.size(1);
+    int32_t batch_size = active_out_indices.size(0);
+    int32_t active_out_dim = active_out_indices.size(1);
+    int32_t in_dim = weights.size(1);
 
     auto out_values_0 = out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_out_indices_0 = active_out_indices.accessor<int64_t,2>();
+    auto active_out_indices_0 = active_out_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
     auto bias_0 = bias.accessor<scalar_t, 1>();
 
-    for(int64_t i=0; i<batch_size; i++){
+    for(int32_t i=0; i<batch_size; i++){
         auto out_values_1 = out_values_0[i];
         auto in_values_1 = in_values_0[i];
         auto active_out_indices_1 = active_out_indices_0[i];
         
-        for(int64_t j=0; j<active_out_dim; j++){
+        for(int32_t j=0; j<active_out_dim; j++){
             scalar_t &res = out_values_1[j];
-            int64_t out_index = active_out_indices_1[j];
+            int32_t out_index = active_out_indices_1[j];
             auto weights_1 = weights_0[out_index];
 
             res = bias_0[out_index];
-            for(int64_t k=0; k<in_dim; k++)
+            for(int32_t k=0; k<in_dim; k++)
                 res += in_values_1[k]*weights_1[k];
         }
     }
@@ -60,29 +60,29 @@ void diso_kernel(
         const torch::Tensor& weights,
         const torch::Tensor& bias){
 
-    int64_t batch_size = active_out_indices.size(0);
-    int64_t active_out_dim = active_out_indices.size(1);
-    int64_t in_dim = weights.size(1);
+    int32_t batch_size = active_out_indices.size(0);
+    int32_t active_out_dim = active_out_indices.size(1);
+    int32_t in_dim = weights.size(1);
 
     auto out_values_0 = out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_out_indices_0 = active_out_indices.accessor<int64_t,2>();
+    auto active_out_indices_0 = active_out_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
     auto bias_0 = bias.accessor<scalar_t, 1>();
 
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto out_values_1 = out_values_0[i];
             auto in_values_1 = in_values_0[i];
             auto active_out_indices_1 = active_out_indices_0[i];
             
-            for(int64_t j=0; j<active_out_dim; j++){
+            for(int32_t j=0; j<active_out_dim; j++){
                 scalar_t &res = out_values_1[j];
-                int64_t out_index = active_out_indices_1[j];
+                int32_t out_index = active_out_indices_1[j];
                 auto weights_1 = weights_0[out_index];
 
                 res = bias_0[out_index];
-                for(int64_t k=0; k<in_dim; k++)
+                for(int32_t k=0; k<in_dim; k++)
                     res += in_values_1[k]*weights_1[k];
             }
         }
@@ -114,32 +114,32 @@ void diso_backward_kernel(
         const torch::Tensor& active_out_indices,
         const torch::Tensor& weights){
 
-    int64_t batch_size = active_out_indices.size(0);
-    int64_t active_out_dim = active_out_indices.size(1);
-    int64_t in_dim = weights.size(1);
+    int32_t batch_size = active_out_indices.size(0);
+    int32_t active_out_dim = active_out_indices.size(1);
+    int32_t in_dim = weights.size(1);
 
     auto grad_in_values_0 = grad_in_values.accessor<scalar_t, 2>();
     auto grad_weights_0 = grad_weights.accessor<scalar_t, 2>();
     auto grad_bias_0 = grad_bias.accessor<scalar_t, 1>();
     auto grad_out_values_0 = grad_out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_out_indices_0 = active_out_indices.accessor<int64_t,2>();
+    auto active_out_indices_0 = active_out_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
 
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto grad_out_values_1 = grad_out_values_0[i];
             auto grad_in_values_1 = grad_in_values_0[i];
             auto in_values_1 = in_values_0[i];
             auto active_out_indices_1 = active_out_indices_0[i];
             
-            for(int64_t j=0; j<active_out_dim; j++){
+            for(int32_t j=0; j<active_out_dim; j++){
                 scalar_t grad = grad_out_values_1[j];
-                int64_t out_index = active_out_indices_1[j];
+                int32_t out_index = active_out_indices_1[j];
                 auto weights_1 = weights_0[out_index];
                 auto grad_weights_1 = grad_weights_0[out_index];
 
-                for(int64_t k=0; k<in_dim; k++){
+                for(int32_t k=0; k<in_dim; k++){
                     grad_in_values_1[k] += weights_1[k]*grad;
                     grad_weights_1[k] += in_values_1[k]*grad;
                 }
@@ -177,28 +177,28 @@ void sido_kernel(
         const torch::Tensor& weights,
         const torch::Tensor& bias){
 
-    int64_t batch_size = active_in_indices.size(0);
-    int64_t active_in_dim = active_in_indices.size(1);
-    int64_t out_dim = weights.size(0);
+    int32_t batch_size = active_in_indices.size(0);
+    int32_t active_in_dim = active_in_indices.size(1);
+    int32_t out_dim = weights.size(0);
 
     auto out_values_0 = out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_in_indices_0 = active_in_indices.accessor<int64_t,2>();
+    auto active_in_indices_0 = active_in_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
     auto bias_0 = bias.accessor<scalar_t, 1>();
 
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto out_values_1 = out_values_0[i];
             auto in_values_1 = in_values_0[i];
             auto active_in_indices_1 = active_in_indices_0[i];
             
-            for(int64_t j=0; j<out_dim; j++){
+            for(int32_t j=0; j<out_dim; j++){
                 scalar_t &res = out_values_1[j];
                 auto weights_1 = weights_0[j];
 
                 res = bias_0[j];
-                for(int64_t k=0; k<active_in_dim; k++)
+                for(int32_t k=0; k<active_in_dim; k++)
                     res += in_values_1[k]*weights_1[active_in_indices_1[k]];
             }
         }
@@ -230,36 +230,36 @@ void sido_backward_kernel(
         const torch::Tensor& active_in_indices,
         const torch::Tensor& weights){
 
-    int64_t batch_size = active_in_indices.size(0);
-    int64_t active_in_dim = active_in_indices.size(1);
-    int64_t out_dim = weights.size(0);
+    int32_t batch_size = active_in_indices.size(0);
+    int32_t active_in_dim = active_in_indices.size(1);
+    int32_t out_dim = weights.size(0);
 
     auto grad_in_values_0 = grad_in_values.accessor<scalar_t, 2>();
     auto grad_weights_0 = grad_weights.accessor<scalar_t, 2>();
     auto grad_bias_0 = grad_bias.accessor<scalar_t, 1>();
     auto grad_out_values_0 = grad_out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_in_indices_0 = active_in_indices.accessor<int64_t,2>();
+    auto active_in_indices_0 = active_in_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
 
     // version 1 (might lead to large collisions for weights and bias gradients)
-    // at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-    //     for (int64_t i = start; i < end; i++){
+    // at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+    //     for (int32_t i = start; i < end; i++){
     //         auto grad_out_values_1 = grad_out_values_0[i];
     //         auto grad_in_values_1 = grad_in_values_0[i];
     //         auto in_values_1 = in_values_0[i];
     //         auto active_in_indices_1 = active_in_indices_0[i];
             
-    //         int64_t cyc_shift_l = (out_dim/batch_size)*i;
-    //         int64_t cyc_shift_r = cyc_shift_l + out_dim;
-    //         for(int64_t jj=cyc_shift_l; jj<cyc_shift_r; jj++){
-    //             int64_t j = jj%out_dim; // doing to possibly decrease collision probability
+    //         int32_t cyc_shift_l = (out_dim/batch_size)*i;
+    //         int32_t cyc_shift_r = cyc_shift_l + out_dim;
+    //         for(int32_t jj=cyc_shift_l; jj<cyc_shift_r; jj++){
+    //             int32_t j = jj%out_dim; // doing to possibly decrease collision probability
     //             scalar_t grad = grad_out_values_1[j];
     //             auto weights_1 = weights_0[j];
     //             auto grad_weights_1 = grad_weights_0[j];
 
-    //             for(int64_t k=0; k<active_in_dim; k++){
-    //                 int64_t in_index = active_in_indices_1[k];
+    //             for(int32_t k=0; k<active_in_dim; k++){
+    //                 int32_t in_index = active_in_indices_1[k];
     //                 grad_in_values_1[k] += weights_1[in_index]*grad;
     //                 grad_weights_1[in_index] += in_values_1[k]*grad;
     //             }
@@ -270,34 +270,34 @@ void sido_backward_kernel(
 
     // version 2 (reduces collisions for weights and bias gradients at the 
     // expense of 2 parallel_for dispatches and maybe more accessor indexing)
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto grad_out_values_1 = grad_out_values_0[i];
             auto grad_in_values_1 = grad_in_values_0[i];
             auto in_values_1 = in_values_0[i];
             auto active_in_indices_1 = active_in_indices_0[i];
             
-            for(int64_t j=0; j<out_dim; j++){
+            for(int32_t j=0; j<out_dim; j++){
                 scalar_t grad = grad_out_values_1[j];
                 auto weights_1 = weights_0[j];
                 
-                for(int64_t k=0; k<active_in_dim; k++)
+                for(int32_t k=0; k<active_in_dim; k++)
                     grad_in_values_1[k] += weights_1[active_in_indices_1[k]]*grad;
             }
         }
     });
-    at::parallel_for(0, out_dim, 0, [&](int64_t start, int64_t end){
-        for (int64_t j = start; j < end; j++){
+    at::parallel_for(0, out_dim, 0, [&](int32_t start, int32_t end){
+        for (int32_t j = start; j < end; j++){
             auto weights_1 = weights_0[j];
             auto grad_weights_1 = grad_weights_0[j];
             scalar_t &grad_bias_1 = grad_bias_0[j];
 
-            for(int64_t i=0; i<batch_size; i++){
+            for(int32_t i=0; i<batch_size; i++){
                 scalar_t grad = grad_out_values_0[i][j];
                 auto in_values_1 = in_values_0[i];
                 auto active_in_indices_1 = active_in_indices_0[i];
 
-                for(int64_t k=0; k<active_in_dim; k++)
+                for(int32_t k=0; k<active_in_dim; k++)
                     grad_weights_1[active_in_indices_1[k]] += in_values_1[k]*grad;
                 grad_bias_1 += grad;
             }
@@ -334,31 +334,31 @@ void siso_kernel(
         const torch::Tensor& weights,
         const torch::Tensor& bias){
 
-    int64_t batch_size = active_out_indices.size(0);
-    int64_t active_out_dim = active_out_indices.size(1);
-    int64_t active_in_dim = active_in_indices.size(1);
+    int32_t batch_size = active_out_indices.size(0);
+    int32_t active_out_dim = active_out_indices.size(1);
+    int32_t active_in_dim = active_in_indices.size(1);
 
     auto out_values_0 = out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_out_indices_0 = active_out_indices.accessor<int64_t,2>();
-    auto active_in_indices_0 = active_in_indices.accessor<int64_t,2>();
+    auto active_out_indices_0 = active_out_indices.accessor<int32_t,2>();
+    auto active_in_indices_0 = active_in_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
     auto bias_0 = bias.accessor<scalar_t, 1>();
 
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto out_values_1 = out_values_0[i];
             auto in_values_1 = in_values_0[i];
             auto active_out_indices_1 = active_out_indices_0[i];
             auto active_in_indices_1 = active_in_indices_0[i];
             
-            for(int64_t j=0; j<active_out_dim; j++){
+            for(int32_t j=0; j<active_out_dim; j++){
                 scalar_t &res = out_values_1[j];
-                int64_t out_index = active_out_indices_1[j];
+                int32_t out_index = active_out_indices_1[j];
                 auto weights_1 = weights_0[out_index];
 
                 res = bias_0[out_index];
-                for(int64_t k=0; k<active_in_dim; k++)
+                for(int32_t k=0; k<active_in_dim; k++)
                     res += in_values_1[k]*weights_1[active_in_indices_1[k]];
             }
         }
@@ -392,17 +392,17 @@ void siso_backward_kernel(
         const torch::Tensor& active_in_indices,
         const torch::Tensor& weights){
 
-    int64_t batch_size = active_out_indices.size(0);
-    int64_t active_out_dim = active_out_indices.size(1);
-    int64_t active_in_dim = active_in_indices.size(1);
+    int32_t batch_size = active_out_indices.size(0);
+    int32_t active_out_dim = active_out_indices.size(1);
+    int32_t active_in_dim = active_in_indices.size(1);
 
     auto grad_in_values_0 = grad_in_values.accessor<scalar_t, 2>();
     auto grad_weights_0 = grad_weights.accessor<scalar_t, 2>();
     auto grad_bias_0 = grad_bias.accessor<scalar_t, 1>();
     auto grad_out_values_0 = grad_out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
-    auto active_out_indices_0 = active_out_indices.accessor<int64_t,2>();
-    auto active_in_indices_0 = active_in_indices.accessor<int64_t,2>();
+    auto active_out_indices_0 = active_out_indices.accessor<int32_t,2>();
+    auto active_in_indices_0 = active_in_indices.accessor<int32_t,2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
 
     // The implementation currently parallelizes over the batch dimension. This is
@@ -412,22 +412,22 @@ void siso_backward_kernel(
     // only while computing grad_weights. However, this requires that active_out_dim be
     // same for all inputs, so that work allocation for threads is balanced.
     // The implementation would be similar to version 2 of sido
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto grad_out_values_1 = grad_out_values_0[i];
             auto grad_in_values_1 = grad_in_values_0[i];
             auto in_values_1 = in_values_0[i];
             auto active_out_indices_1 = active_out_indices_0[i];
             auto active_in_indices_1 = active_in_indices_0[i];
             
-            for(int64_t j=0; j<active_out_dim; j++){
+            for(int32_t j=0; j<active_out_dim; j++){
                 scalar_t grad = grad_out_values_1[j];
-                int64_t out_index = active_out_indices_1[j];
+                int32_t out_index = active_out_indices_1[j];
                 auto weights_1 = weights_0[out_index];
                 auto grad_weights_1 = grad_weights_0[out_index];
 
-                for(int64_t k=0; k<active_in_dim; k++){
-                    int64_t in_index = active_in_indices_1[k];
+                for(int32_t k=0; k<active_in_dim; k++){
+                    int32_t in_index = active_in_indices_1[k];
                     grad_in_values_1[k] += weights_1[in_index]*grad;
                     grad_weights_1[in_index] += in_values_1[k]*grad;
                 }
@@ -465,26 +465,26 @@ void dido_naive_kernel(
         const torch::Tensor& weights,
         const torch::Tensor& bias){
 
-    int64_t batch_size = out_values.size(0);
-    int64_t out_dim = out_values.size(1);
-    int64_t in_dim = weights.size(1);
+    int32_t batch_size = out_values.size(0);
+    int32_t out_dim = out_values.size(1);
+    int32_t in_dim = weights.size(1);
 
     auto out_values_0 = out_values.accessor<scalar_t, 2>();
     auto in_values_0 = in_values.accessor<scalar_t, 2>();
     auto weights_0 = weights.accessor<scalar_t, 2>();
     auto bias_0 = bias.accessor<scalar_t, 1>();
 
-    at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end){
-        for (int64_t i = start; i < end; i++){
+    at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end){
+        for (int32_t i = start; i < end; i++){
             auto out_values_1 = out_values_0[i];
             auto in_values_1 = in_values_0[i];
             
-            for(int64_t j=0; j<out_dim; j++){
+            for(int32_t j=0; j<out_dim; j++){
                 scalar_t &res = out_values_1[j];
                 auto weights_1 = weights_0[j];
 
                 res = bias_0[j];
-                for(int64_t k=0; k<in_dim; k++)
+                for(int32_t k=0; k<in_dim; k++)
                     res += in_values_1[k]*weights_1[k];
             }
         }

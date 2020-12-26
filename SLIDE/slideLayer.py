@@ -49,6 +49,7 @@ class slideLayer(nn.Module):
         # in the prefix of active_out_indices, and their counts in presample_counts
         # if presample_counts is None, means no pre samples
         # If active_out_indices is None, returns dense output
+        # all int tensors expected to be of type torch.int32
 
         if active_out_indices is None:
             # Dense Output
@@ -63,7 +64,6 @@ class slideLayer(nn.Module):
                 self.buckets_table.sample_nodes_vanilla(hash_indices, active_out_indices, presample_counts)
             else:
                 raise ValueError('Invalid Buckets Table Sampling Mode:', self.sample_mode)
-            active_out_indices = active_out_indices.long()
             out_values = self.sparse_multiplier(
                 in_values, self.linear.weight, self.linear.bias, active_in_indices,active_out_indices)
             return out_values, active_out_indices
