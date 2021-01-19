@@ -20,11 +20,11 @@ def main(config_dict):
     batch_size = config_dict['batch_size']
     lr = config_dict['lr']
     #
+    os.environ["CUDA_VISIBLE_DEVICES"] = config_dict['GPUs']
     if config_dict['GPUs'] == '':
         num_threads = config_dict['num_threads']
     else:
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        os.environ["CUDA_VISIBLE_DEVICES"] = config_dict['GPUs']
     #
     train_files = glob.glob(config_dict['data_path_train'])
     test_files = glob.glob(config_dict['data_path_test'])

@@ -8,7 +8,7 @@ from srpHash import srpHashTable
 
 class slideLayer(nn.Module):
     def __init__(
-        self, in_dim, out_dim, K, L, bucket_size=128, fill_mode='FIFO', sample_mode='vanilla'):
+        self, in_dim, out_dim, K=0, L=0, bucket_size=128, fill_mode='FIFO', sample_mode='vanilla'):
         super(slideLayer, self).__init__()
 
         self.in_dim = in_dim
@@ -23,10 +23,12 @@ class slideLayer(nn.Module):
         self.linear = nn.Linear(self.in_dim, self.out_dim)
         self.sparse_multiplier = cppSparseMultiply.apply
         # self.sparse_multiplier = pySparseMultiply
-        self.hash_table = srpHashTable(self.K, self.L, self.in_dim)
-        self.buckets_table = bucketsTable(self.L, self.num_buckets, self.bucket_size)
 
-        self.rehash_nodes(reset_hashes=False, reset_randperm_nodes=True)
+        if self.K>0 and self.L>0: # K and L reqd only if sparse output operations reqd
+            self.hash_table = srpHashTable(self.K, self.L, self.in_dim)
+            self.buckets_table = bucketsTable(self.L, self.num_buckets, self.bucket_size)
+
+            self.rehash_nodes(reset_hashes=False, reset_randperm_nodes=True)
 
     def rehash_nodes(self, reset_hashes=True, reset_randperm_nodes=False):
         if reset_hashes:

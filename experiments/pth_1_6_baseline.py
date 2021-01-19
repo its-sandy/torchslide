@@ -48,12 +48,12 @@ def main(config_dict):
     lr = config_dict['lr']
 
     #
+    os.environ['CUDA_VISIBLE_DEVICES'] = config_dict['GPUs']
     torch.set_num_threads(config_dict['num_threads'])
     if config_dict['GPUs'] == '':
         device = torch.device('cpu')
     else:
         os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-        os.environ['CUDA_VISIBLE_DEVICES'] = config_dict['GPUs']
         device = torch.device('cuda:0')
     #
     train_files = glob.glob(config_dict['data_path_train'])
@@ -140,8 +140,6 @@ def main(config_dict):
         torch.save(net.state_dict(), MODEL_PATH)
         print('saved model to', MODEL_PATH, file=out, flush=True)
 
-    # make sure tf and pytorch baselines use gpu similarly
-    # make sure tensors are copied between CPU and GPU as reqd
 
 if __name__ == '__main__':
     # execute only if run as a script

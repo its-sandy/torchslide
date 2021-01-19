@@ -1,5 +1,6 @@
 import math
 import torch
+import torch.nn.functional as F
 import srpHash_cpp
 
 
@@ -11,8 +12,11 @@ class srpHashTable():
         self.reset_hashes()
 
     def reset_hashes(self):
+        # Has minimal overhead compared to hashing and bucketing latency
         self.hash_vecs = torch.rand([self.L*self.K, self.dim], dtype=torch.get_default_dtype()).round() * 2 -1
         # self.hash_vecs = torch.rand([self.L*self.K, self.dim], dtype=torch.get_default_dtype()) - 0.5
+        # self.hash_vecs = torch.randn([self.L*self.K, self.dim], dtype=torch.get_default_dtype())
+        # self.hash_vecs = F.normalize(torch.randn([self.L*self.K, self.dim], dtype=torch.get_default_dtype()))
 
     def get_hash_indices(self, in_values, active_in_indices=None):
         hash_indices = torch.empty([in_values.size(0), self.L], dtype=torch.int32)
