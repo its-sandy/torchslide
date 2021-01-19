@@ -7,8 +7,7 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 
 from config import configs
-from itertools import islice
-from data_utils import data_generator, data_generator_tst
+from data_utils import data_generator_train_tf, data_generator_test_tf
 
 ## Training Params
 def main(config_dict):
@@ -62,16 +61,16 @@ def main(config_dict):
     sess = tf.Session(config=Config)
     sess.run(tf.global_variables_initializer())
     #
-    training_data_generator = data_generator(train_files, batch_size, n_classes)
+    training_data_generator = data_generator_train_tf(train_files, batch_size, n_classes)
     steps_per_epoch = n_train//batch_size
     n_steps = n_epochs*steps_per_epoch
-    n_check = 50
+    val_freq = config_dict['val_freq']
     #
     begin_time = time.time()
     total_time = 0
     #
     with open(config_dict['log_file'], 'a') as out:
-        print('--------------------------------------------', file=out, flush=True)
+        print('\n--------------------------------------------', file=out, flush=True)
         print(os.path.basename(__file__), file=out, flush=True)
         print(config_dict, file=out, flush=True)
         print('train_files =', train_files, file=out, flush=True)
@@ -84,25 +83,25 @@ def main(config_dict):
             sess.run(train_step, feed_dict={x_idxs:idxs_batch, x_vals:vals_batch, y:labels_batch})
 
             # validate
-            if i%steps_per_epoch==steps_per_epoch-1 or i%n_check==0:
+            if i%steps_per_epoch==steps_per_epoch-1 or i%val_freq==0:
                 total_time+=time.time()-begin_time
 
-                if i%steps_per_epoch==steps_per_epoch-1:
-                    n_steps_val = n_test//batch_size  # precision on entire test data
+                if i%steps_per_epoch==steps_per_epoch-1 or config_dict['num_val_batches']==-1:
+                    num_val_batches = n_test//batch_size  # precision on entire test data
                 else:
-                    n_steps_val = 20 # precision on first x batches
+                    num_val_batches = config_dict['num_val_batches'] # precision on first x batches
 
-                test_data_generator = data_generator_tst(test_files, batch_size)
+                test_data_generator = data_generator_test_tf(test_files, batch_size)
                 p_at_k = 0
-                for l in range(n_steps_val):
+                for l in range(num_val_batches):
                     idxs_batch, vals_batch, labels_batch = next(test_data_generator)
                     top_k_classes = sess.run(top_idxs, feed_dict={x_idxs:idxs_batch, x_vals:vals_batch})
                     p_at_k += np.mean([len(np.intersect1d(top_k_classes[j],labels_batch[j]))/min(k,len(labels_batch[j])) for j in range(len(top_k_classes))])
                 #
                 print('step=',i,
-                      'time=',total_time,
-                      'num_val_batches',n_steps_val,
-                      'p_at_1=',p_at_k/n_steps_val,
+                      'train_time=',total_time,
+                      'num_val_batches',num_val_batches,
+                      'p_at_1=',p_at_k/num_val_batches,
                       file=out, flush=True)
                 #
                 begin_time = time.time()

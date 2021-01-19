@@ -14,10 +14,17 @@ configs = {
         'n_epochs' : 5,
         'lr' : 0.0001,
         # 'lr' : 0.00025,
-        'GPUs' : '0', # empty string uses only CPU
+        # 'GPUs' : '0', # empty string uses only CPU
+        'GPUs' : '', # empty string uses only CPU
         'num_threads' : 48, # Only used when GPUs is empty string
 
+        # 'val_freq' : 50,
+        'val_freq' : 100,
+        # 'num_val_batches' : 20, # -1 for full test
+        'num_val_batches' : -1, # -1 for full test
+        'n_epochs' : 5,
         'log_file' : 'log_delicious200k',
+        'model_save_file_prefix' : 'delicious200k',
 
         # for sampled softmax
         'n_samples' : 205443//10,
@@ -43,7 +50,10 @@ configs = {
         'GPUs' : '0', # empty string uses only CPU
         'num_threads' : 48, # Only used when GPUs is empty string
 
+        'val_freq' : 50,
+        'num_val_batches' : 50, # -1 for full test
         'log_file' : 'log_amazon670k',
+        'model_save_file_prefix' : 'amazon670k',
 
         # for sampled softmax
         'n_samples' : 670091//10,
