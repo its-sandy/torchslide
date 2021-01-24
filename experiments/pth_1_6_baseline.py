@@ -38,6 +38,12 @@ class Net(nn.Module):
 
 
 def main(config_dict):
+    seed = 0
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    torch.set_default_dtype(torch.float32)
+    # torch.set_default_dtype(torch.float64)
+
     feature_dim = config_dict['feature_dim']
     n_classes = config_dict['n_classes']
     hidden_dim = config_dict['hidden_dim']
@@ -76,6 +82,8 @@ def main(config_dict):
         print('train_files =', train_files, file=out, flush=True)
         print('test_files =', test_files, file=out, flush=True)
         print('device =', device, file=out, flush=True)
+        print('torch.get_default_dtype() =', torch.get_default_dtype(), file=out, flush=True) 
+        print('random seed =', seed, file=out, flush=True) 
         if(device.type == 'cuda'):
             print('gpu =', torch.cuda.get_device_name(0), file=out, flush=True)
         print(file=out, flush=True)
@@ -91,7 +99,7 @@ def main(config_dict):
             idxs_batch, vals_batch, y = next(training_data_generator)
             x = torch.sparse_coo_tensor(idxs_batch, vals_batch,
                                         size=(batch_size, feature_dim),
-                                        dtype=torch.float32, device=device,
+                                        device=device,
                                         requires_grad=False)
             optimizer.zero_grad()
 
@@ -116,7 +124,7 @@ def main(config_dict):
                         idxs_batch, vals_batch, labels_batch = next(test_data_generator)
                         x = torch.sparse_coo_tensor(idxs_batch, vals_batch,
                                                     size=(batch_size, feature_dim),
-                                                    dtype=torch.float32, device=device,
+                                                    device=device,
                                                     requires_grad=False)
                         optimizer.zero_grad()
 

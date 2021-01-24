@@ -54,6 +54,12 @@ class Net(nn.Module):
 
 
 def main(config_dict):
+    seed = 0
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    torch.set_default_dtype(torch.float32)
+    # torch.set_default_dtype(torch.float64)
+
     feature_dim = config_dict['feature_dim']
     n_classes = config_dict['n_classes']
     hidden_dim = config_dict['hidden_dim']
@@ -67,6 +73,8 @@ def main(config_dict):
 
     net = Net(feature_dim, hidden_dim, n_classes).to(device)
     #
+    print('torch.get_default_dtype() =', torch.get_default_dtype(), flush=True) 
+    print('random seed =', seed, flush=True) 
     print('device =', device, flush=True)
     print('net.slide1:', vars(net.slide1), flush=True)
     print('net.slide2:', vars(net.slide2), flush=True)
@@ -82,7 +90,7 @@ def main(config_dict):
     idxs_pth, vals_pth, y_pth = next(training_data_generator_pth)
     x_pth = torch.sparse_coo_tensor(idxs_pth, vals_pth,
                                 size=(batch_size, feature_dim),
-                                dtype=torch.float32, device=device,
+                                device=device,
                                 requires_grad=False)
     # optimizer.zero_grad()
     net.zero_grad()
@@ -100,7 +108,7 @@ def main(config_dict):
     training_data_generator_tslide = data_generator_tslide(train_files, batch_size)
     x_inds, x_vals, y_inds = next(training_data_generator_tslide)
     x_inds = get_padded_tensor(x_inds, torch.int32)
-    x_vals = get_padded_tensor(x_vals, torch.float32)
+    x_vals = get_padded_tensor(x_vals, dtype=torch.get_default_dtype())
     if n_label_samples == -1: # dense
         y_probs = get_y_probs_from_y_inds(y_inds, n_classes)
         y_inds = presample_counts = None

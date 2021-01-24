@@ -55,6 +55,11 @@ class Net(nn.Module):
 
 
 def main(config_dict):
+    seed = 0
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    torch.set_default_dtype(torch.float32)
+
     feature_dim = config_dict['feature_dim']
     n_classes = config_dict['n_classes']
     hidden_dim = config_dict['hidden_dim']
@@ -92,6 +97,8 @@ def main(config_dict):
         print('train_files =', train_files, file=out, flush=True)
         print('test_files =', test_files, file=out, flush=True)
         print('device =', device, file=out, flush=True)
+        print('torch.get_default_dtype() =', torch.get_default_dtype(), file=out, flush=True) 
+        print('random seed =', seed, file=out, flush=True) 
         print(file=out, flush=True)
         print('model Layers', file=out, flush=True)
         print('net.slide1:', vars(net.slide1), file=out, flush=True)
@@ -108,14 +115,14 @@ def main(config_dict):
             # train
             x_inds, x_vals, y_inds = next(training_data_generator)
             x_inds = get_padded_tensor(x_inds, torch.int32)
-            x_vals = get_padded_tensor(x_vals, torch.float32)
+            x_vals = get_padded_tensor(x_vals, torch.get_default_dtype())
             if n_label_samples == -1: # dense
                 y_probs = get_y_probs_from_y_inds(y_inds, n_classes)
                 y_inds = presample_counts = None
             else:
                 presample_counts = torch.IntTensor([len(y_ind) for y_ind in y_inds])
-                # y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=presample_counts.max().item()+n_label_samples)
-                y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=n_label_samples)
+                y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=presample_counts.max().item()+n_label_samples)
+                # y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=n_label_samples)
             
             # time each line and layer in pytorch baseline..including time for fetching input
             # first try training with dense output/label layer...once that works as expected, introduce sparsity in last layer
@@ -135,9 +142,9 @@ def main(config_dict):
             optimizer.step()
 
             # rehash nodes
-            if i % repermute_freq == repermute_freq - 1:
+            if n_label_samples != -1 and i % repermute_freq == repermute_freq - 1:
                 net.slide2.rehash_nodes(reset_hashes=True, reset_randperm_nodes=True)
-            elif i % rehash_freq == rehash_freq - 1:
+            elif n_label_samples != -1 and i % rehash_freq == rehash_freq - 1:
                 net.slide2.rehash_nodes(reset_hashes=True, reset_randperm_nodes=False)
 
             # validate
@@ -153,9 +160,9 @@ def main(config_dict):
                 p_at_k = 0
                 with torch.no_grad():
                     for l in range(num_val_batches):
-                        x_inds, x_vals, labels_batch = next(training_data_generator)
+                        x_inds, x_vals, labels_batch = next(test_data_generator)
                         x_inds = get_padded_tensor(x_inds, torch.int32)
-                        x_vals = get_padded_tensor(x_vals, torch.float32)
+                        x_vals = get_padded_tensor(x_vals, torch.get_default_dtype())
 
                         optimizer.zero_grad()
 

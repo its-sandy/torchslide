@@ -18,18 +18,18 @@ configs = {
         'GPUs' : '', # empty string uses only CPU
         'num_threads' : 48, # Only used when GPUs is empty string
 
-        # 'val_freq' : 50,
-        'val_freq' : 200,
-        # 'num_val_batches' : 20, # -1 for full test
-        'num_val_batches' : -1, # -1 for full test
-        'n_epochs' : 5,
+        'val_freq' : 50,
+        # 'val_freq' : 100,
+        'num_val_batches' : 50, # -1 for full test
+        # 'num_val_batches' : -1, # -1 for full test
+        'n_epochs' : 4,
         'log_file' : 'log_delicious200k',
         'model_save_file_prefix' : 'delicious200k',
 
         # for TorchSLIDE
-        'n_label_samples' : 2048,
+        # 'n_label_samples' : 2048,
         # 'n_label_samples' : 1024,
-        # 'n_label_samples' : -1, # for dense
+        'n_label_samples' : -1, # for dense
         'rehash_freq' : 50,
         'repermute_freq' : 1000,
 

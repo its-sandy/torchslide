@@ -165,7 +165,8 @@ def get_padded_tensor(lili, dtype, padded_length=None, pad_zero=True):
     if padded_length is None:
         padded_length = max_length
     elif padded_length < max_length:
-        raise ValueError('padded_length (%d) < max_length (%d)' % (padded_length, max_length))
+        padded_length = max_length
+        # raise ValueError('padded_length (%d) < max_length (%d)' % (padded_length, max_length))
     
     dtype = torch_to_numpy_dtype_dict[dtype]
     if pad_zero:

@@ -11,6 +11,11 @@ from data_utils import data_generator_train_tf, data_generator_test_tf
 
 ## Training Params
 def main(config_dict):
+    seed = 0
+    tf.set_random_seed(seed)
+    np.random.seed(seed)
+    float_dtype = tf.float32
+
     feature_dim = config_dict['feature_dim']
     n_classes = config_dict['n_classes']
     hidden_dim = config_dict['hidden_dim']
@@ -30,16 +35,16 @@ def main(config_dict):
     test_files = glob.glob(config_dict['data_path_test'])
     #
     x_idxs = tf.placeholder(tf.int64, shape=[None,2])
-    x_vals = tf.placeholder(tf.float32, shape=[None])
+    x_vals = tf.placeholder(dtype = float_dtype, shape=[None])
     x = tf.SparseTensor(x_idxs, x_vals, [batch_size,feature_dim])
-    y = tf.placeholder(tf.float32, shape=[None,n_classes])
+    y = tf.placeholder(dtype = float_dtype, shape=[None,n_classes])
     #
-    W1 = tf.Variable(tf.truncated_normal([feature_dim,hidden_dim], stddev=2.0/math.sqrt(feature_dim+hidden_dim)))
-    b1 = tf.Variable(tf.truncated_normal([hidden_dim], stddev=2.0/math.sqrt(feature_dim+hidden_dim)))
+    W1 = tf.Variable(tf.truncated_normal([feature_dim,hidden_dim], stddev=2.0/math.sqrt(feature_dim+hidden_dim)), dtype = float_dtype)
+    b1 = tf.Variable(tf.truncated_normal([hidden_dim], stddev=2.0/math.sqrt(feature_dim+hidden_dim)), dtype = float_dtype)
     layer_1 = tf.nn.relu(tf.sparse_tensor_dense_matmul(x,W1)+b1)
     #
-    W2 = tf.Variable(tf.truncated_normal([hidden_dim,n_classes], stddev=2.0/math.sqrt(hidden_dim+n_classes)))
-    b2 = tf.Variable(tf.truncated_normal([n_classes], stddev=2.0/math.sqrt(n_classes+hidden_dim)))
+    W2 = tf.Variable(tf.truncated_normal([hidden_dim,n_classes], stddev=2.0/math.sqrt(hidden_dim+n_classes)), dtype = float_dtype)
+    b2 = tf.Variable(tf.truncated_normal([n_classes], stddev=2.0/math.sqrt(n_classes+hidden_dim)), dtype = float_dtype)
     logits = tf.matmul(layer_1,W2)+b2
     #
     k=1
@@ -75,6 +80,8 @@ def main(config_dict):
         print(config_dict, file=out, flush=True)
         print('train_files =', train_files, file=out, flush=True)
         print('test_files =', test_files, file=out, flush=True)
+        print('float_dtype =', float_dtype, file=out, flush=True)
+        print('random seed =', seed, file=out, flush=True) 
         print(device_lib.list_local_devices(), file=out, flush=True)
         print(file=out, flush=True)
         for i in range(n_steps):
