@@ -25,6 +25,8 @@ configs = {
         'model_save_file_prefix' : 'delicious200k',
 
         # for TorchSLIDE
+        'last_K' : 9,
+        'last_L' : 50,
         'n_label_samples' : 0,
         # 'n_label_samples' : 2048,
         # 'n_label_samples' : 1024,
@@ -50,10 +52,10 @@ configs = {
         
         'hidden_dim' : 128,
         'batch_size' : 128,
-        'n_epochs' : 25,
+        'n_epochs' : 15,
         'lr' : 0.0001,
         # 'lr' : 0.00025,
-        'GPUs' : '0', # empty string uses only CPU
+        'GPUs' : '', # empty string uses only CPU
         'num_threads' : 48, # Only used when GPUs is empty string
 
         'val_freq' : 50,
@@ -62,12 +64,14 @@ configs = {
         'model_save_file_prefix' : 'amazon670k',
 
         # for TorchSLIDE
-        'n_label_samples' : 0,
-        # 'n_label_samples' : 2048,
-        # 'n_label_samples' : 1024,
+        'last_K' : 14,
+        'last_L' : 50,
+        # 'n_label_samples' : 0,
+        'n_label_samples' : 4096,
+        # 'n_label_samples' : 6144,
         # 'n_label_samples' : -1, # for dense
         'rehash_freq' : 50,
-        'repermute_freq' : 1000,
+        'repermute_freq' : 4000,
 
         # for sampled softmax
         'n_samples' : 670091//10,

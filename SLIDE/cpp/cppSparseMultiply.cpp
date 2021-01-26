@@ -274,7 +274,6 @@ void sido_backward_kernel(
         for (int32_t i = start; i < end; i++){
             auto grad_out_values_1 = grad_out_values_0[i];
             auto grad_in_values_1 = grad_in_values_0[i];
-            auto in_values_1 = in_values_0[i];
             auto active_in_indices_1 = active_in_indices_0[i];
             
             for(int32_t j=0; j<out_dim; j++){
@@ -288,7 +287,6 @@ void sido_backward_kernel(
     });
     at::parallel_for(0, out_dim, 0, [&](int32_t start, int32_t end){
         for (int32_t j = start; j < end; j++){
-            auto weights_1 = weights_0[j];
             auto grad_weights_1 = grad_weights_0[j];
             scalar_t &grad_bias_1 = grad_bias_0[j];
 

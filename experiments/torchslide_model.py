@@ -29,7 +29,7 @@ def truncated_normal_init_(tensor, mean=0, std=1):
 
 
 class Net(nn.Module):
-    def __init__(self, feature_dim, hidden_dim, n_classes):
+    def __init__(self, feature_dim, hidden_dim, n_classes, last_K, last_L):
         super(Net, self).__init__()
 
         self.slide1 = slideLayer(in_dim=feature_dim, out_dim=hidden_dim,
@@ -39,7 +39,7 @@ class Net(nn.Module):
         truncated_normal_init_(self.slide1.linear.bias, std=2.0/math.sqrt(feature_dim+hidden_dim))
         
         self.slide2 = slideLayer(in_dim=hidden_dim, out_dim=n_classes,
-                                 K=9, L=50, bucket_size=128,
+                                 K=last_K, L=last_L, bucket_size=128,
                                  fill_mode='FIFO', sample_mode='vanilla')
         truncated_normal_init_(self.slide2.linear.weight, std=2.0/math.sqrt(hidden_dim+n_classes))
         truncated_normal_init_(self.slide2.linear.bias, std=2.0/math.sqrt(hidden_dim+n_classes))
@@ -73,6 +73,8 @@ def main(config_dict):
     n_label_samples = config_dict['n_label_samples']
     rehash_freq = config_dict['rehash_freq']
     repermute_freq = config_dict['repermute_freq']
+    last_K = config_dict['last_K']
+    last_L = config_dict['last_L']
     #
     torch.set_num_threads(config_dict['num_threads'])
     device = torch.device('cpu')
@@ -84,7 +86,7 @@ def main(config_dict):
     n_steps = n_epochs*steps_per_epoch
     val_freq = config_dict['val_freq']
 
-    net = Net(feature_dim, hidden_dim, n_classes).to(device)
+    net = Net(feature_dim, hidden_dim, n_classes, last_K, last_L).to(device)
     #
 
     begin_time = time.time()
@@ -103,8 +105,8 @@ def main(config_dict):
         print('model Layers', file=out, flush=True)
         print('net.slide1:', vars(net.slide1), file=out, flush=True)
         print('net.slide2:', vars(net.slide2), file=out, flush=True)
-        print('using padded_length=presample_counts.max().item()+n_label_samples', file=out, flush=True)
-        # print('using padded_length=n_label_samples', file=out, flush=True)
+        # print('using padded_length=presample_counts.max().item()+n_label_samples', file=out, flush=True)
+        print('using padded_length=n_label_samples', file=out, flush=True)
         print(file=out, flush=True)
 
         MODEL_PATH = config_dict['model_save_file_prefix'] + 'torchslide.pth'
@@ -123,8 +125,8 @@ def main(config_dict):
                 y_inds = presample_counts = None
             else:
                 presample_counts = torch.IntTensor([len(y_ind) for y_ind in y_inds])
-                y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=presample_counts.max().item()+n_label_samples)
-                # y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=n_label_samples)
+                # y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=presample_counts.max().item()+n_label_samples)
+                y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=n_label_samples)
             
             # time each line and layer in pytorch baseline..including time for fetching input
             # first try training with dense output/label layer...once that works as expected, introduce sparsity in last layer
@@ -191,8 +193,13 @@ def main(config_dict):
 
 if __name__ == '__main__':
     # execute only if run as a script
-    this_config = configs['delicious200k']
-    this_config['n_label_samples'] = 2048
+    # this_config = configs['delicious200k']
+    # this_config['n_label_samples'] = 2048
+    # main(this_config)
+    # this_config['n_label_samples'] = 1024
+    # main(this_config)
+    this_config = configs['amazon670k']
+    this_config['n_label_samples'] = 4096
     main(this_config)
-    this_config['n_label_samples'] = 1024
+    this_config['n_label_samples'] = 6144
     main(this_config)
