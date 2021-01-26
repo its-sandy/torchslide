@@ -113,6 +113,7 @@ def main(config_dict):
                 total_time+=time.time()-begin_time
 
                 if i%steps_per_epoch==steps_per_epoch-1 or config_dict['num_val_batches']==-1:
+                    torch.save(net.state_dict(), MODEL_PATH)
                     num_val_batches = n_test//batch_size  # precision on entire test data
                 else:
                     num_val_batches = config_dict['num_val_batches'] # precision on first x batches
@@ -151,4 +152,5 @@ def main(config_dict):
 
 if __name__ == '__main__':
     # execute only if run as a script
-    main(configs['delicious200k'])
+    # main(configs['delicious200k'])
+    main(configs['amazon670k'])

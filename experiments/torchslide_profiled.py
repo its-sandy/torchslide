@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import torch
+import torch.autograd.profiler as profiler
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -65,7 +66,7 @@ def main(config_dict):
     hidden_dim = config_dict['hidden_dim']
     n_train = config_dict['n_train']
     n_test = config_dict['n_test']
-    n_epochs = config_dict['n_epochs']
+    n_epochs = 1
     batch_size = config_dict['batch_size']
     lr = config_dict['lr']
 
@@ -85,34 +86,11 @@ def main(config_dict):
     val_freq = config_dict['val_freq']
 
     net = Net(feature_dim, hidden_dim, n_classes).to(device)
+    optimizer = optim.Adam(net.parameters(), lr=lr)
     #
 
-    begin_time = time.time()
-    total_time = 0
-    #
-    with open(config_dict['log_file'], 'a') as out:
-        print('\n--------------------------------------------', file=out, flush=True)
-        print(os.path.basename(__file__), file=out, flush=True)
-        print(config_dict, file=out, flush=True)
-        print('train_files =', train_files, file=out, flush=True)
-        print('test_files =', test_files, file=out, flush=True)
-        print('device =', device, file=out, flush=True)
-        print('torch.get_default_dtype() =', torch.get_default_dtype(), file=out, flush=True) 
-        print('random seed =', seed, file=out, flush=True) 
-        print(file=out, flush=True)
-        print('model Layers', file=out, flush=True)
-        print('net.slide1:', vars(net.slide1), file=out, flush=True)
-        print('net.slide2:', vars(net.slide2), file=out, flush=True)
-        print('using padded_length=presample_counts.max().item()+n_label_samples', file=out, flush=True)
-        # print('using padded_length=n_label_samples', file=out, flush=True)
-        print(file=out, flush=True)
-
-        MODEL_PATH = config_dict['model_save_file_prefix'] + 'torchslide.pth'
-        # net.load_state_dict(torch.load(MODEL_PATH))
-        # print('loaded model from', MODEL_PATH, file=out, flush=True)
-
-        optimizer = optim.Adam(net.parameters(), lr=lr)
-
+    begin_time = time.time()        
+    with profiler.profile(record_shapes=True) as prof:
         for i in range(n_steps):
             # train
             x_inds, x_vals, y_inds = next(training_data_generator)
@@ -126,11 +104,6 @@ def main(config_dict):
                 y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=presample_counts.max().item()+n_label_samples)
                 # y_inds = get_padded_tensor(y_inds, torch.int32, padded_length=n_label_samples)
             
-            # time each line and layer in pytorch baseline..including time for fetching input
-            # first try training with dense output/label layer...once that works as expected, introduce sparsity in last layer
-            # slide model (with dense out) took a more iterations to converge compared to the pytorch baseline...why was this the case?...was it just coincidence?
-            # make sure pytorch and tf baselines use float32 and not float64
-
             optimizer.zero_grad()
             out_logits, out_inds = net(in_values=x_vals,
                                        active_in_indices=x_inds,
@@ -149,44 +122,29 @@ def main(config_dict):
             elif n_label_samples != -1 and i % rehash_freq == rehash_freq - 1:
                 net.slide2.rehash_nodes(reset_hashes=True, reset_randperm_nodes=False)
 
-            # validate
-            if i%steps_per_epoch==steps_per_epoch-1 or i%val_freq==0:
-                total_time+=time.time()-begin_time
+    end_time = time.time()
 
-                if i%steps_per_epoch==steps_per_epoch-1 or config_dict['num_val_batches']==-1:
-                    num_val_batches = n_test//batch_size  # precision on entire test data
-                else:
-                    num_val_batches = config_dict['num_val_batches'] # precision on first x batches
-
-                test_data_generator = data_generator_tslide(test_files, batch_size)
-                p_at_k = 0
-                with torch.no_grad():
-                    for l in range(num_val_batches):
-                        x_inds, x_vals, labels_batch = next(test_data_generator)
-                        x_inds = get_padded_tensor(x_inds, torch.int32)
-                        x_vals = get_padded_tensor(x_vals, torch.get_default_dtype())
-
-                        optimizer.zero_grad()
-
-                        out_logits, _ = net(in_values=x_vals, active_in_indices=x_inds)
-                        k=1
-                        if k==1:
-                            top_k_classes = torch.argmax(out_logits, dim=1)
-                        else:
-                            top_k_classes = torch.topk(out_logits, k, sorted=False)[1]
-                        p_at_k += np.mean([len(np.intersect1d(top_k_classes[j],labels_batch[j]))/min(k,len(labels_batch[j])) for j in range(len(top_k_classes))])
-                #
-                print('step=',i,
-                      'train_time=',total_time,
-                      'num_val_batches',num_val_batches,
-                      'p_at_1=',p_at_k/num_val_batches,
-                      file=out, flush=True)
-                #
-                begin_time = time.time()
-        
-        print('Finished Training', file=out, flush=True)
-        torch.save(net.state_dict(), MODEL_PATH)
-        print('saved model to', MODEL_PATH, file=out, flush=True)
+    with open(config_dict['log_file'], 'a') as out:
+        print('\n--------------------------------------------', file=out, flush=True)
+        print(os.path.basename(__file__), file=out, flush=True)
+        print(config_dict, file=out, flush=True)
+        print('train_files =', train_files, file=out, flush=True)
+        print('test_files =', test_files, file=out, flush=True)
+        print('device =', device, file=out, flush=True)
+        print('torch.get_default_dtype() =', torch.get_default_dtype(), file=out, flush=True) 
+        print('random seed =', seed, file=out, flush=True) 
+        print(file=out, flush=True)
+        print('model Layers', file=out, flush=True)
+        print('net.slide1:', vars(net.slide1), file=out, flush=True)
+        print('net.slide2:', vars(net.slide2), file=out, flush=True)
+        print('using padded_length=presample_counts.max().item()+n_label_samples', file=out, flush=True)
+        # print('using padded_length=n_label_samples', file=out, flush=True)
+        print(file=out, flush=True)
+        print('total train time =', end_time-begin_time, file=out, flush=True)
+        print(prof.key_averages(group_by_input_shape=True).table(), file=out, flush=True)
+        print(file=out, flush=True)
+        print(prof.key_averages(group_by_input_shape=True).table(sort_by='cpu_time_total'), file=out, flush=True)
+        print(file=out, flush=True)
 
 
 if __name__ == '__main__':
@@ -194,5 +152,5 @@ if __name__ == '__main__':
     this_config = configs['delicious200k']
     this_config['n_label_samples'] = 2048
     main(this_config)
-    this_config['n_label_samples'] = 1024
-    main(this_config)
+    # this_config['n_label_samples'] = 1024
+    # main(this_config)

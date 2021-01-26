@@ -10,8 +10,6 @@ configs = {
         
         'hidden_dim' : 128,
         'batch_size' : 128,
-        # 'n_epochs' : 2,
-        'n_epochs' : 5,
         'lr' : 0.0001,
         # 'lr' : 0.00025,
         # 'GPUs' : '0', # empty string uses only CPU
@@ -22,14 +20,15 @@ configs = {
         # 'val_freq' : 100,
         'num_val_batches' : 50, # -1 for full test
         # 'num_val_batches' : -1, # -1 for full test
-        'n_epochs' : 4,
+        'n_epochs' : 7,
         'log_file' : 'log_delicious200k',
         'model_save_file_prefix' : 'delicious200k',
 
         # for TorchSLIDE
+        'n_label_samples' : 0,
         # 'n_label_samples' : 2048,
         # 'n_label_samples' : 1024,
-        'n_label_samples' : -1, # for dense
+        # 'n_label_samples' : -1, # for dense
         'rehash_freq' : 50,
         'repermute_freq' : 1000,
 
@@ -61,6 +60,14 @@ configs = {
         'num_val_batches' : 50, # -1 for full test
         'log_file' : 'log_amazon670k',
         'model_save_file_prefix' : 'amazon670k',
+
+        # for TorchSLIDE
+        'n_label_samples' : 0,
+        # 'n_label_samples' : 2048,
+        # 'n_label_samples' : 1024,
+        # 'n_label_samples' : -1, # for dense
+        'rehash_freq' : 50,
+        'repermute_freq' : 1000,
 
         # for sampled softmax
         'n_samples' : 670091//10,
