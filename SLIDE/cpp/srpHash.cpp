@@ -24,9 +24,10 @@ void get_hash_indices_sparse_kernel(
 
     at::parallel_for(0, batch_size, 0, [&](int32_t start, int32_t end) {
         for (int32_t i = start; i < end; i++) {
+            auto in_values_1 = in_values_0[i];
+            auto active_in_indices_1 = active_in_indices_0[i];
+            
             for (int32_t l = 0; l < L; l++) {
-                auto in_values_1 = in_values_0[i];
-                auto active_in_indices_1 = active_in_indices_0[i];
                 auto hash_vecs_1 = hash_vecs_0[l];
                 
                 int32_t hash_index = 0;
