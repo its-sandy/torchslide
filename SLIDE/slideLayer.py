@@ -4,31 +4,38 @@ from bucketsTable import bucketsTable
 from cppSparseMultiply import cppSparseMultiply
 # from pySparseMultiply import pySparseMultiply
 from srpHash import srpHashTable
+from wtaHash import wtaHashTable
 
 
 class slideLayer(nn.Module):
-    def __init__(
-        self, in_dim, out_dim, K=0, L=0, bucket_size=128, fill_mode='FIFO', sample_mode='vanilla'):
+    def __init__(self, in_dim, out_dim):
         super(slideLayer, self).__init__()
 
         self.in_dim = in_dim
         self.out_dim = out_dim
-        self.K = K
-        self.L = L
-        self.num_buckets = 2**K # for srpHash
-        self.bucket_size = bucket_size
-        self.fill_mode = fill_mode
-        self.sample_mode = sample_mode
 
         self.linear = nn.Linear(self.in_dim, self.out_dim)
         self.sparse_multiplier = cppSparseMultiply.apply
         # self.sparse_multiplier = pySparseMultiply
 
-        if self.K>0 and self.L>0: # K and L reqd only if sparse output operations reqd
-            self.hash_table = srpHashTable(self.K, self.L, self.in_dim)
-            self.buckets_table = bucketsTable(self.L, self.num_buckets, self.bucket_size)
+    def initialize_LSH(self, hash_fn='srp', K=6, L=50, bucket_size=128, fill_mode='FIFO', sample_mode='vanilla', **kwargs):
+        self.K = K
+        self.L = L
+        self.bucket_size = bucket_size
+        self.fill_mode = fill_mode
+        self.sample_mode = sample_mode
 
-            self.rehash_nodes(reset_hashes=False, reset_randperm_nodes=True)
+        if hash_fn == 'srp':
+            self.hash_table = srpHashTable(self.K, self.L, self.in_dim, **kwargs)
+            self.num_buckets = 2**K
+        elif hash_fn == 'wta':
+            self.hash_table = wtaHashTable(self.K, self.L, self.in_dim, **kwargs)
+            self.num_buckets = 2**(K*(self.hash_table.shift_len))
+        else:
+            raise ValueError('Invalid Hash Function:', hash_fn)
+
+        self.buckets_table = bucketsTable(self.L, self.num_buckets, self.bucket_size)
+        self.rehash_nodes(reset_hashes=False, reset_randperm_nodes=True)
 
     def rehash_nodes(self, reset_hashes=True, reset_randperm_nodes=False):
         if reset_hashes:
