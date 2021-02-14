@@ -29,20 +29,32 @@ def truncated_normal_init_(tensor, mean=0, std=1):
 
 
 class Net(nn.Module):
-    def __init__(self, feature_dim, hidden_dim, n_classes, last_K, last_L):
+    def __init__(self, config_dict):
         super(Net, self).__init__()
 
-        self.slide1 = slideLayer(in_dim=feature_dim, out_dim=hidden_dim,
-                                 K=0, L=0, bucket_size=128,
-                                 fill_mode='FIFO', sample_mode='vanilla')
+        feature_dim = config_dict['feature_dim']
+        hidden_dim = config_dict['hidden_dim']
+        n_classes = config_dict['n_classes']
+        last_K = config_dict['last_K']
+        last_L = config_dict['last_L']
+        hash_fn = config_dict['hash_fn']
+        bucket_size = config_dict['bucket_size']
+        fill_mode = config_dict['fill_mode']
+        sample_mode = config_dict['sample_mode']
+        if hash_fn == 'wta':
+            perm_size = config_dict['perm_size']
+
+        self.slide1 = slideLayer(in_dim=feature_dim, out_dim=hidden_dim)
         truncated_normal_init_(self.slide1.linear.weight, std=2.0/math.sqrt(feature_dim+hidden_dim))
         truncated_normal_init_(self.slide1.linear.bias, std=2.0/math.sqrt(feature_dim+hidden_dim))
         
-        self.slide2 = slideLayer(in_dim=hidden_dim, out_dim=n_classes,
-                                 K=last_K, L=last_L, bucket_size=128,
-                                 fill_mode='FIFO', sample_mode='vanilla')
+        self.slide2 = slideLayer(in_dim=hidden_dim, out_dim=n_classes)
         truncated_normal_init_(self.slide2.linear.weight, std=2.0/math.sqrt(hidden_dim+n_classes))
         truncated_normal_init_(self.slide2.linear.bias, std=2.0/math.sqrt(hidden_dim+n_classes))
+        self.slide2.initialize_LSH(hash_fn=hash_fn,
+                                   K=last_K, L=last_L, bucket_size=bucket_size,
+                                   fill_mode=fill_mode, sample_mode=sample_mode,
+                                   perm_size=perm_size)
 
     def forward(self, in_values, active_in_indices, active_label_indices=None, presample_counts=None):
         val1, ind1 = self.slide1(in_values, active_in_indices) # ind1 is None
@@ -86,7 +98,7 @@ def main(config_dict):
     n_steps = n_epochs*steps_per_epoch
     val_freq = config_dict['val_freq']
 
-    net = Net(feature_dim, hidden_dim, n_classes, last_K, last_L).to(device)
+    net = Net(config_dict).to(device)
     #
 
     begin_time = time.time()
@@ -193,13 +205,6 @@ def main(config_dict):
 
 if __name__ == '__main__':
     # execute only if run as a script
-    # this_config = configs['delicious200k']
-    # this_config['n_label_samples'] = 2048
-    # main(this_config)
-    # this_config['n_label_samples'] = 1024
-    # main(this_config)
     this_config = configs['amazon670k']
-    this_config['n_label_samples'] = 4096
-    main(this_config)
-    this_config['n_label_samples'] = 6144
+    # this_config['n_label_samples'] = 4096
     main(this_config)

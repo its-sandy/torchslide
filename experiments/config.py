@@ -58,20 +58,25 @@ configs = {
         'GPUs' : '', # empty string uses only CPU
         'num_threads' : 48, # Only used when GPUs is empty string
 
-        'val_freq' : 50,
+        'val_freq' : 100,
         'num_val_batches' : 50, # -1 for full test
         'log_file' : 'log_amazon670k',
         'model_save_file_prefix' : 'amazon670k',
 
         # for TorchSLIDE
-        'last_K' : 14,
+        'hash_fn' : 'wta',
+        'last_K' : 6,
         'last_L' : 50,
         # 'n_label_samples' : 0,
-        'n_label_samples' : 4096,
-        # 'n_label_samples' : 6144,
+        # 'n_label_samples' : 4096,
+        'n_label_samples' : 1024,
         # 'n_label_samples' : -1, # for dense
         'rehash_freq' : 50,
         'repermute_freq' : 4000,
+        'bucket_size' : 128,
+        'fill_mode' : 'reservoir_sampling',
+        'sample_mode' : 'vanilla',
+        'perm_size' : 8,
 
         # for sampled softmax
         'n_samples' : 670091//10,
