@@ -191,7 +191,58 @@ if __name__ == '__main__':
 
     config_dict['log_file'] = Path(os.path.basename(__file__)).stem + '_out'
     config_dict['num_iter'] = 600
+    #################################################
 
-    run_profiling(config_dict)
-    config_dict['active_out_dim'] = -1 # for dense output
-    run_profiling(config_dict)
+    # base case similar to amazon
+    config_dict_cur = config_dict.copy()
+    run_profiling(config_dict_cur)
+
+    # varying in_dim, active_in_dim (maintaining in sparsity)
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['in_dim'] *= 4
+    config_dict_cur['active_in_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying hidden_dim
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['hidden_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying out_dim, active_out_dim (maintaining out sparsity)
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['out_dim'] *= 4
+    config_dict_cur['active_out_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying active_out_dim (sparsity) 1
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['active_out_dim'] = 1024
+    run_profiling(config_dict_cur)
+
+    # varying active_out_dim (sparsity) 2
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['active_out_dim'] = 16384
+    run_profiling(config_dict_cur)
+    # For these high values of active_out_dim, most nodes come from rand_perm only.
+    # But that's fine for profiling 
+
+    # varying active_out_dim (sparsity) 3
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['active_out_dim'] = 131072
+    run_profiling(config_dict_cur)
+
+    # varying active_out_dim (sparsity) 4
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['active_out_dim'] = -1 # dense
+    run_profiling(config_dict_cur)
+    # No rehashing performed in this case
+
+    # varying L (num_hashes) 1
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['last_L'] = 25
+    run_profiling(config_dict_cur)
+
+    # varying L (num_hashes) 2
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['last_L'] = 100
+    run_profiling(config_dict_cur)
