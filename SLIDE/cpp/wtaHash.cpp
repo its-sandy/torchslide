@@ -46,7 +46,7 @@ void get_hash_indices_dense_kernel(
             for(int32_t l=0; l<L; l++) {
                 int32_t hash_index = 0;
                 for(int32_t k=0; k<K; k++) {
-                    hash_index |= (max_inds[j]<<(k*shift_len));
+                    hash_index += (max_inds[j]<<(k*shift_len));
                     j++;
                 }
                 hash_indices_1[l] = hash_index;
@@ -119,7 +119,7 @@ void get_hash_indices_sparse_kernel(
             for(int32_t l=0; l<L; l++) {
                 int32_t hash_index = 0;
                 for(int32_t k=0; k<K; k++) {
-                    hash_index |= (max_inds[j]<<(k*shift_len));
+                    hash_index += (max_inds[j]<<(k*shift_len));
                     j++;
                 }
                 hash_indices_1[l] = hash_index;
