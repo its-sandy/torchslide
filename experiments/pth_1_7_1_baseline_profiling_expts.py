@@ -124,6 +124,9 @@ def run_profiling(config_dict):
             print(file=out, flush=True)
             print(prof.key_averages(group_by_stack_n=8).table(sort_by='cpu_time_total', row_limit=200), file=out, flush=True)
             print(file=out, flush=True)
+    global counter
+    counter += 1
+    prof.export_chrome_trace(log_file + '_' + str(counter) + '.json')
 
 
 if __name__ == '__main__':
@@ -141,8 +144,55 @@ if __name__ == '__main__':
     config_dict['num_threads'] = 48
 
     config_dict['log_file'] = Path(os.path.basename(__file__)).stem + '_out'
-    config_dict['num_iter'] = 600
+    config_dict['num_iter'] = 500
 
-    run_profiling(config_dict)
-
+    global counter
+    counter = 0
     # check if both gpu and cpu profiler are working
+    #################################################
+    # gpu
+    config_dict['gpus'] = '0'
+
+    # base case similar to amazon
+    config_dict_cur = config_dict.copy()
+    run_profiling(config_dict_cur)
+
+    # varying in_dim, active_in_dim (maintaining in sparsity)
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['in_dim'] *= 4
+    config_dict_cur['active_in_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying hidden_dim
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['hidden_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying out_dim
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['out_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+
+    # cpu
+    config_dict['gpus'] = ''
+
+    # base case similar to amazon
+    config_dict_cur = config_dict.copy()
+    run_profiling(config_dict_cur)
+
+    # varying in_dim, active_in_dim (maintaining in sparsity)
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['in_dim'] *= 4
+    config_dict_cur['active_in_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying hidden_dim
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['hidden_dim'] *= 4
+    run_profiling(config_dict_cur)
+
+    # varying out_dim
+    config_dict_cur = config_dict.copy()
+    config_dict_cur['out_dim'] *= 4
+    run_profiling(config_dict_cur)
