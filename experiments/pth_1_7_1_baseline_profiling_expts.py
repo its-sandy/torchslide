@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # config_dict['active_out_dim'] = 4096
     config_dict['batch_size'] = 128
 
-    config_dict['gpus'] = '0'
+    config_dict['gpus'] = ''
     config_dict['num_threads'] = 48
 
     config_dict['log_file'] = Path(os.path.basename(__file__)).stem + '_out'
