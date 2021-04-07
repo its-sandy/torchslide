@@ -64,19 +64,19 @@ configs = {
         'model_save_file_prefix' : 'amazon670k',
 
         # for TorchSLIDE
-        'hash_fn' : 'wta',
-        'last_K' : 6,
+        'hash_fn' : 'srp',
+        'last_K' : 14,
         'last_L' : 50,
         # 'n_label_samples' : 0,
-        # 'n_label_samples' : 4096,
-        'n_label_samples' : 1024,
+        'n_label_samples' : 4096,
+        # 'n_label_samples' : 1024,
         # 'n_label_samples' : -1, # for dense
         'rehash_freq' : 50,
         'repermute_freq' : 4000,
         'bucket_size' : 128,
         'fill_mode' : 'reservoir_sampling',
         'sample_mode' : 'vanilla',
-        'perm_size' : 8,
+        'perm_size' : 4,
 
         # for sampled softmax
         'n_samples' : 670091//10,

@@ -163,6 +163,9 @@ def run_profiling(config_dict):
         print(file=out, flush=True)
         print(prof.key_averages(group_by_stack_n=8).table(sort_by='cpu_time_total', row_limit=200), file=out, flush=True)
         print(file=out, flush=True)
+    global counter
+    counter += 1
+    prof.export_chrome_trace(log_file + '_' + str(counter) + '.json')
 
 
 if __name__ == '__main__':
@@ -190,7 +193,13 @@ if __name__ == '__main__':
     config_dict['num_threads'] = 48
 
     config_dict['log_file'] = Path(os.path.basename(__file__)).stem + '_out'
+<<<<<<< Updated upstream
     config_dict['num_iter'] = 600
+=======
+    config_dict['num_iter'] = 500
+>>>>>>> Stashed changes
+    global counter
+    counter = 0
     #################################################
 
     # base case similar to amazon
