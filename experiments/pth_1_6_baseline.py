@@ -38,6 +38,7 @@ class Net(nn.Module):
 
 
 def main(config_dict):
+    expt_begin_time = time.time()
     seed = 0
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -148,9 +149,11 @@ def main(config_dict):
         print('Finished Training', file=out, flush=True)
         torch.save(net.state_dict(), MODEL_PATH)
         print('saved model to', MODEL_PATH, file=out, flush=True)
+        print('total_experiment_time = ', time.time() - expt_begin_time, file=out, flush=True)
 
 
 if __name__ == '__main__':
     # execute only if run as a script
     # main(configs['delicious200k'])
-    main(configs['amazon670k'])
+    # main(configs['amazon670k'])
+    main(configs['amazon3m'])

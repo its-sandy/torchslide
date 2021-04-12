@@ -85,4 +85,48 @@ configs = {
         # we will pad the rest of them with a dummy class (see data_generator_ss in util.py)
         'max_label' : 1,
     },
+
+    'amazon3m' : {
+        'data_path_train' : 'data/amazon3m/Amazon-3M.bow/shuffled_train.txt',
+        'data_path_test' : 'data/amazon3m/Amazon-3M.bow/shuffled_test.txt',
+        'feature_dim' : 337067,
+        'n_classes' : 2812281,
+        'n_train' : 1717899,
+        'n_test' : 742507,
+        
+        'hidden_dim' : 128,
+        'batch_size' : 32,
+        'n_epochs' : 5,
+        'lr' : 0.0001,
+        # 'lr' : 0.00025,
+        'GPUs' : '0', # empty string uses only CPU
+        'num_threads' : 48, # Only used when GPUs is empty string
+
+        'val_freq' : 100,
+        'num_val_batches' : 50, # -1 for full test
+        'log_file' : 'log_amazon3m',
+        'model_save_file_prefix' : 'amazon3m',
+
+        # for TorchSLIDE
+        'hash_fn' : 'wta',
+        'last_K' : 4,
+        'last_L' : 50,
+        # 'n_label_samples' : 0,
+        'n_label_samples' : 4096,
+        # 'n_label_samples' : 1024,
+        # 'n_label_samples' : -1, # for dense
+        'rehash_freq' : 50,
+        'repermute_freq' : 4000,
+        'bucket_size' : 1024,
+        'fill_mode' : 'reservoir_sampling',
+        'sample_mode' : 'vanilla',
+        'perm_size' : 8,
+
+        # for sampled softmax
+        'n_samples' : 2812281//10,
+        # choose the max_labels per training sample. 
+        # If the number of true labels is < max_label,
+        # we will pad the rest of them with a dummy class (see data_generator_ss in util.py)
+        'max_label' : 1,
+    },
 }
